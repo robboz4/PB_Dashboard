@@ -11,11 +11,11 @@ table, th, td {
 
 </head>
 <body>
-<h1 align=\"center\"> Mock up dashboard  for monitoring motors under test. (A.2.0)</h1>
+<h1 align=\"center\"> Mock up dashboard  for monitoring motors under test. (A.2.1)</h1>
 
-Press Button  to start simluated updating of csv file. It will run a 10x loop to add new data. <br>
+Press Button  to start simluated updating of table from a csv file/stream. It will run a 10x loop to add new or updated  data. <br>
 The data is serial number, revs and temperature. Numbers are simply generated via python random code generator 1-10.<br>
-Wait about 10 seconds after pressing the run button, refresh the page to see the data. The page  will refresh every 10 seconds after that.<br>
+The page  will refresh every 10 seconds after that.<br>
 
 <form action="dashboard.php" method="POST">
 <button name="submit"  value="start" class="green">Start demo run.</button>
@@ -26,6 +26,12 @@ Wait about 10 seconds after pressing the run button, refresh the page to see the
 
 
 Dave Robinson 4/4/2020
+
+A.0.0 Simple reading a csv file an dupdating the screen
+A.2.0 Updates table with new or updated data of eeiting entries. (4/5/2020)
+A.2.1 Removed the need to refresh page to get data after pressing the start button (4/6/2020)
+
+
 
 */
 
@@ -63,21 +69,14 @@ if(isset($_POST['submit'])){
 
 
           $cmd= "/usr/bin/python /var/www/html/test/CSV/motor_stream.py";
-         exec($cmd, $output, $error);
-//	 echo $output . $error;
+          shell_exec("/usr/bin/nohup " . $cmd . ">/dev/null 2>&1 &"); 
+// Asynchronously runs command. No waiting...
+
 	}
 
 else {
          $stream =  fopen("motor.csv",  "r");
-//	 echo " Dashboard is: ";
-/*	 $dashboard = array(
-				array( 'serial'=>"", 'rev'=>"", 'temp'=>"")
-			   );
-
-*/
 	$dashboard = array();
-//	 print_r($dashboard);
-//	 echo "      <br>";
          echo  "<table>";
          echo "<caption>Motor data </caption>";
          echo "<tr> <th> Motor S/N </th><th> Revs </th><th>  Temperature </th> <th> Timestamp </th></tr>";
@@ -85,21 +84,6 @@ else {
          while (($motor = fgetcsv($stream)) !== false) {
 	
 	        $dashboard = check_entry($motor, $dashboard);
-//		echo "entries " . count($dashboard) . "<br>";
-//		var_dump($dashboard);
-//		echo '<pre>' . var_export($dashboard, true) . '</pre>';
-		}
-//	  echo "Main loop <br>";
-
-	fclose($stream);
-/*	echo count($dashboard) . "= Number in array<br>";
-	foreach ($dashboard as $c) {
-		while (list($k, $v) = each($c)){
-			echo  $v . "<br>"; 
-		}
-		"<br>";
-	}
-*/
 	$arrlength = count($dashboard);
 	for($x = 0; $x < $arrlength; $x++) {
         echo "<tr>";   
