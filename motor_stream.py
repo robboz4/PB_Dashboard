@@ -3,6 +3,9 @@
 # Dave Robinson 4/4/20
 
 import time
+import datetime
+
+
 # generate random integer values
 from random import seed
 from random import randint
@@ -17,10 +20,11 @@ while  i < 10:
         	value = randint(0, 10)
 #        	print(value)
 	if value != 0:	
+		x = datetime.datetime.now()
 		rev = value * 1000
-		temp = value * 32
-		msn = value + value
-		entry = "PBM00-" + str(msn) + "," + str(rev) + "," + str(temp) + "\n"
+		temp = value * 32 + x.minute
+		msn = value 
+		entry = "PBM00-" + str(msn) + "," + str(rev) + "," + str(temp) + "," + str(x) + "\n"
 
 		file_object = open('motor.csv', 'a')
 		file_object.write(entry)
