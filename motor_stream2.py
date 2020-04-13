@@ -34,10 +34,10 @@ while  i < 1000:
 		msn = value 
 		entry0 =  str(temp) + "," + str(temp) + "," + str(temp) + "," + str(temp) + "," + str(msn) + "," + str(msn) + "," + str(msn) +  "," 
 		entry1 =  str(temp) + "," + str(temp) + "," + str(temp) + "," + str(temp) + "," + str(msn) + "," + str(msn) + "," + str(msn) + "," 
-		entry2 =  str(rev)  + "," + str(rev)  + "," + str(rev)  + "," + str(temp) + "," + " "      + "," + " " + "\n" 
-		entry3 =  str(rev)  + "," + str(rev)  + "," + ","       + "," + "\n" 
+		entry2 =  str(rev)  + "," + str(rev)  + "," + str(rev)  + "," + str(temp) + "," + "0 "      + "," + "0 " + "\n" 
+		entry3 =  str(rev)  + "," + str(rev)  + ",0" + ",0"       + ",0" + "\n" 
 		entry4 =  str(rev)  + "," + str(rev)  + "," + str(rev)  + "," + str(temp) + "," + str(rev)  + "," + str(temp)+  "," 
-		entry5 =  ",,,,,,,,,,,,"
+		entry5 =  ",0,0,0,0,0,0,0,0,0,0,0,0"
 		entry = entry0 + entry1 + entry2
 #		print(entry)
 		file_object = open('motor2.csv', 'w')
@@ -47,10 +47,10 @@ while  i < 1000:
 		file_object = open('motor3.csv', 'w')
                 file_object.write(entry)
                 file_object.close()
-		entry = entry0 + entry0  + entry4 + entry5 + str(rev)  + "," + str(rev)  + "," + str(msn) + "\n"  
-		file_object = open('motor4.csv', 'w')
-                file_object.write(entry)
-                file_object.close()
+#		entry = entry0 + entry0  + entry4 + entry5 + str(rev)  + "," + str(rev)  + "," + str(msn) + "\n"  
+#		file_object = open('motor4.csv', 'w')
+#                file_object.write(entry)
+#                file_object.close()
 
 
 	time.sleep(.1)
