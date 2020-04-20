@@ -16,7 +16,7 @@ td.hot{
  color:red;
 </style>
 
-<meta http-equiv="refresh" content="1">
+<meta http-equiv="refresh" content="10">
 
 </head>
 <body>
@@ -26,7 +26,7 @@ These tables SIMPLY repesent  three data stream formats from a  controller/motor
 
 Press the "Start demo run" button  to start a simluate run. It will run a program  to  update the  tables with random data <br>
 Numbers are simply generated via a python random code generator. They will be fugded to more accurately resemble the data. later<br>
-The page  will refresh every 1 second after that.<br>
+The page  will refresh every 10 second after that. This gives time to update  values in the third table.<br>
 Some numbers may show up red. This will be numbers that have limits that are not to  be exceeded. Currently it is not set up for these tables correctly.
 It's a work in progress. <br>
 The graph at the bottom is also a WIP. <br>
@@ -47,11 +47,13 @@ A.2.0 Updates table with new or updated data of existing entries.
 A.2.1 Removed the need to refresh page to get data after pressing the start button
 A.3.0 New dashboard with real example fo actual data stream.
 A.3.1 Added a PHP line graph as a test. 
+A.3.2 Added update function for first 3  fields and write out updates to csv file
 */
 
 function   check_entry($motor, $dashboard)
 /*
 function to check if serial number is already reporting.
+OBSOLETE NOT NEEDED
 
 */
 {
@@ -78,7 +80,7 @@ function check_range($cell_offset, $cell_value)
 
 
 /*Function to see if rpm or temp go over set limits. Turn  text red to indicate vaule is over limit
-
+Simple hack
 */
 {
 	if ($cell_offset == 2 ) {
@@ -105,16 +107,66 @@ function check_range($cell_offset, $cell_value)
 
 if(isset($_POST['submit'])){
 
-	  if (($_POST['submit'])  == "update"){
-                echo "Update pressed <br>";
+	  if (($_POST['submit'])  == "update")
+/* checks to see if the submit button is equal to update
+or else just assumes it is the  demo button has been pressed
+
+*/
+		{
+		$settings = array();
+		if (($stream =  fopen("motor4.csv",  "r")) == FALSE) {
+			echo "File Open error <br>";
+		}
+		// Opens  streeam file 3 to get parameters that will be changed.
+		while (($motor = fgetcsv($stream)) !== false) {
+              	  $settings = check_entry($motor, $settings);
+		}
+		fclose($stream);
+		$change = FALSE;
+		$arrlength = count($settings);
+		// Only first three parameters set up to be modified. 
+		// Demo only. Real world needs parameter padding to 4 characters with +/- sign
+		// AA+1234 - demo deos AA+ and what was entered inthe form field.
+		if ( $_POST['AA'] != "") {
+			echo "Sending command AA" . $_POST['AA'] . " to controller<br>";
+			$settings[0][0] = $_POST['AA'];
+			$change = TRUE; 
+		  }
+		if ( $_POST['AB'] != "") {
+                        echo "Sending command AB" . $_POST['AB'] . " to controller<br>";
+			$settings[0][1] = $_POST['AB'];
+			$change = TRUE;    
+                  }
+                if ( $_POST['AC'] != "") {
+                        echo "Sending command AC" . $_POST['AC'] . " to controller<br>";   
+                 	$settings[0][2] = $_POST['AC'];
+			 $change = TRUE; 
+		 }
+		// Simulates writing to the stream of updated parameters.
+                 if (($handle =  fopen("motor4.csv",  "w")) == FALSE) {
+                        echo "File Open error for writing  <br>";
                 }
-	  else{
-          $cmd= "/usr/bin/python /var/www/html/test/CSV/motor_stream2.py";
-          shell_exec("/usr/bin/nohup " . $cmd . ">/dev/null 2>&1 &"); 
-//Asynchronously runs command. No waiting...
+		$str = implode(",", $settings[0]);
+		if ( $change == TRUE ) {
+			fwrite($handle, $str);
+			fclose($handle);
+		}
+		else{
+			fwrite($handle, $str);
+			fclose($handle);
+		}
+//		fclose($handle);
+		$change = FALSE;
+                }
+
+
+	  else {
+	          $cmd= "/usr/bin/python /var/www/html/test/CSV/motor_stream2.py";
+        	  shell_exec("/usr/bin/nohup " . $cmd . ">/dev/null 2>&1 &"); 
+		  //Asynchronously runs command. No waiting...
 		}
 	}
-
+//end of isset - tests for forms  being submitted Below is main  table drawing.
 else {
          $stream =  fopen("motor2.csv",  "r");
 	 $dashboard = array();
@@ -199,7 +251,7 @@ else {
                                         echo "<td>" . $value . "</td>";
                                         $y +=1;
                                 }
-                          $chart = $chart + $dashboard[$x];                              
+                          $chart = $chart + $dashboard[$x]; // adding variables to be plotted inthe chart.                              
                         }
                         echo "</tr>";
 //			$chart = $chart + $dashboard[$x];
@@ -209,7 +261,9 @@ else {
 
 	 $stream =  fopen("motor4.csv",  "r");
          $dashboard = array();
-         echo  "<table>";
+//         echo "<form action=\"../echo.php\" method=\"POST\">";
+	  echo "<form action=\"dashboard2.php\" method=\"POST\">";
+	 echo  "<table>";
          echo "<caption>Motor data  String Format #3</caption>";
          echo "<tr> <th> Max Battery <br> Amps</th><th>Min Battery <br> Amps</th><th> Max Current <br> cmd</th> <th>Min Current <br> cmd</th>
                     <th> Max RPM</th> <th>Ramp rate</th> <th>Pole Pairs</th> <th> Speed Command</th><th> Stream Period</th>
@@ -251,13 +305,15 @@ else {
   //                              $chart = $chart + $dashboard[$x];
                         }
                         echo "</tr>";
-			echo "<tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>";
+			echo "<tr><td><input type=\"text\" name=\"AA\" id=\"AA\" value=\"\" > </td><td><input type=\"text\" name=\"AB\" id=\"AB\" value=\"\"</td><td><input type=\"text\" name=\"AC\" id=\"AC\" value=\"\"</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>";
 			echo "<td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>";
 			echo "<td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td>0<td>0</td>";
 			echo "<td>0</td><td>0</td><td></td><td></td><td></td></tr>";
                 }
         
         echo "</table>";
+	echo "<button name=\"submit\"  value=\"update\" class=\"green\">Update Values. (Only First 3 changeable).</button>";
+	echo "</form>";
 //	var_dump($chart);
 	$pc = new C_PhpChartX(array($chart),'basic_chart');
 	$pc->set_title(array('text'=>'Controller Output Chart of Stream #2 '));
@@ -277,10 +333,6 @@ else {
 }
 ?>
 
-
-<form action="../echo.php" method="POST">
-<button name="submit"  value="update" class="green">Update Values. NOT YET IMPLEMENTED.</button>
-</form>
 
 
 </html>
