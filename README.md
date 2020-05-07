@@ -15,7 +15,7 @@ There is a test of phpchartlite  (https://phpchart.com) to draw a graph of the i
 
 Project is moving to node.js so no further upates to this php demo or POC.
 
-Added Javascript version dashboard5.html, motor_stream3.py for dmeo. Should create motor2.csv, but if not an updated one has been added.
+Added Javascript version dashboard5.php, motor_stream3.py and scripted2.html  for demo. it should create motor2.csv, but if not an updated one has been added. The screen will show an animated RPM dial for 100 cycles. 
 
 Set up on a Raspberry Pi in the following directory structure:
 
